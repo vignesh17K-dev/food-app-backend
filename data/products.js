@@ -1583,7 +1583,6 @@ const mock_data = {
         "A tender cut of beef grilled to perfection, seasoned with herbs and spices, and served with a side of vegetables or potatoes.",
       sizes: ["200g", "300g", "400g"],
     },
-
     {
       id: "cdd1178d-2fc8-4c30-a95f-a45912c769a7",
       name: "Steak Sandwich",
@@ -1841,7 +1840,6 @@ const mock_data = {
       sizes: ["Half", "Full", "Family Pack"],
       image: `${URL}/dummyData/biryani.png`,
     },
-
     {
       id: "d368cf77-3293-499e-9d84-8a5290955d34",
       name: "Beef Burritos",
@@ -2498,7 +2496,7 @@ const mock_data = {
         "f3c61923-bb82-4a32-bac0-ec7cbb724df9",
         "3a053439-8ef9-4497-b67c-e1e04c8255f9",
         "99af29bb-de16-43b7-92d5-56a68d11206c",
-        "d3c71a77-dc8d-4069-9403-d98a04e930d2",,
+        "d3c71a77-dc8d-4069-9403-d98a04e930d2",
         "d6e7f8a9-b0c1-2345-6789-f01234567890",
         "e7f8a9b0-c1d2-3456-7890-012345678901",
         "f8a9b0c1-d2e3-4567-8901-123456789012",
@@ -2525,7 +2523,7 @@ const mock_data = {
         "b133d3b7-40b5-4733-9559-f953dd5041e1",
         "8401eeba-20ef-4ce9-b66c-b628cb19c564",
         "0226853d-669d-4274-a3c3-3c41b5353297",
-        "1dc5e967-3ed2-4190-8c48-2a381f742de1",,
+        "1dc5e967-3ed2-4190-8c48-2a381f742de1",
         "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         "b2c3d4e5-f6a7-8901-bcde-f12345678901",
         "c3d4e5f6-a7b8-9012-cdef-123456789012",
@@ -2541,7 +2539,7 @@ const mock_data = {
         "6c437e01-e4d9-4b7a-80e7-674b881aecd9",
         "5a66931f-99ce-414d-8f8a-97db3a4d3cea",
         "961430bc-071a-4a92-af5b-227c4c784b39",
-        "24a56b27-c82c-461f-befd-bfa5a2ab4aa9",,
+        "24a56b27-c82c-461f-befd-bfa5a2ab4aa9",
         "f6a7b8c9-d0e1-2345-f012-456789012345",
         "a7b8c9d0-e1f2-3456-0123-567890123456",
         "b8c9d0e1-f2a3-4567-1234-678901234567",
@@ -2557,7 +2555,7 @@ const mock_data = {
         "7875a3e1-ebfd-4880-be76-4feeb439321a",
         "b4fa601c-3749-4e5b-b880-ba7c2f3d41cc",
         "49748785-cb68-4cd1-b1b0-cebfca2efc93",
-        "f00f0953-c20f-4f44-8ec3-310e06ab90da",,
+        "f00f0953-c20f-4f44-8ec3-310e06ab90da",
         "c1d2e3f4-a5b6-7890-1234-456789012345",
         "d2e3f4a5-b6c7-8901-2345-567890123456",
         "e3f4a5b6-c7d8-9012-3456-678901234567",
