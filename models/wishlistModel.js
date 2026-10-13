@@ -17,7 +17,10 @@ const wishlistSchema = new mongoose.Schema(
         isFavorite: { type: Boolean, default: false },
         image: { type: String, required: true },
         added_at: { type: Date, default: Date.now },
-        sizes: { type: String, required: true }
+        sizes: {
+          type: [String],
+          required: true
+        }
       },
     ],
   },
