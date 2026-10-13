@@ -58,7 +58,11 @@ const addProductToWishlist = expressAsyncHandler(async (req, res) => {
       (p) => p?.id === product_id
     );
 
-    wishlist.products.push(product_data);
+    const product_details = mock_data?.product_details?.find(
+      (p) => p?.id === product_id
+    );
+
+    wishlist.products.push({...product_data, sizes: product_details?.sizes });
 
     await wishlist.save();
 
