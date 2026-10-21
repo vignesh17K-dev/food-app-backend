@@ -11,9 +11,6 @@ const paymentDetailsSchema = new mongoose.Schema(
       required: true,
     },
     brand: { type: String, required: true },
-    last4: { type: String, required: true },
-    expiryMonth: { type: Number, required: true },
-    expiryYear: { type: Number, required: true },
   },
   { _id: false }
 );
