@@ -1,17 +1,19 @@
 const asyncHandler = require("express-async-handler");
 const { validate: validateUuid } = require("uuid");
-const PaymentMethod = require("../models/paymentMethod");
+const PaymentMethod = require("../models/paymentModel");
 
 const getUserId = (req) => req?.user?.id;
 
 const getAllCards = asyncHandler(async (req, res) => {
-  const userId = getUserId(req);
-  if (!userId) {
+  const user_id = getUserId(req);
+  if (!user_id) {
     return res.status(401).json({ message: "User Id is required" });
   }
 
-  const cards = await PaymentMethod.find({ userId })
-    .select("id provider brand last4 expiryMonth expiryYear createdAt")
+  const cards = await PaymentMethod.find({ user_id })
+    .select(
+      "payment_method_id provider brand last4 expiryMonth expiryYear createdAt"
+    )
     .sort({ createdAt: -1 })
     .lean();
 
@@ -23,13 +25,13 @@ const getAllCards = asyncHandler(async (req, res) => {
 });
 
 const addCard = asyncHandler(async (req, res) => {
-  const userId = getUserId(req);
-  if (!userId) {
+  const user_id = getUserId(req);
+  const allowedBrands = ["Visa", "Mastercard", "RuPay"];
+  if (!user_id) {
     return res.status(401).json({ message: "User Id is required" });
   }
 
   const { brand, last4, expiryMonth, expiryYear } = req.body;
-  const allowedBrands = ["Visa", "Mastercard", "RuPay"];
 
   if (!allowedBrands.includes(brand)) {
     return res.status(400).json({ message: "Invalid demo card brand" });
@@ -54,7 +56,7 @@ const addCard = asyncHandler(async (req, res) => {
   }
 
   const card = await PaymentMethod.create({
-    userId,
+    user_id,
     provider: "demo",
     brand,
     last4,
@@ -65,7 +67,7 @@ const addCard = asyncHandler(async (req, res) => {
   res.status(201).json({
     status: 201,
     data: {
-      id: card.id,
+      payment_method_id: card.payment_method_id,
       provider: card.provider,
       brand: card.brand,
       last4: card.last4,
@@ -77,17 +79,20 @@ const addCard = asyncHandler(async (req, res) => {
 });
 
 const deleteCard = asyncHandler(async (req, res) => {
-  const userId = getUserId(req);
-  if (!userId) {
+  const user_id = getUserId(req);
+  if (!user_id) {
     return res.status(401).json({ message: "User Id is required" });
   }
 
-  const { id } = req?.params;
-  if (!validateUuid(id)) {
+  const { payment_method_id } = req?.params;
+  if (!validateUuid(payment_method_id)) {
     return res.status(400).json({ message: "Invalid card ID" });
   }
 
-  const deleted = await PaymentMethod.findOneAndDelete({ id, userId });
+  const deleted = await PaymentMethod.findOneAndDelete({
+    payment_method_id,
+    user_id,
+  });
 
   if (!deleted) {
     return res.status(404).json({ message: "Card not found" });

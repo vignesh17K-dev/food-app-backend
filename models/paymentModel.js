@@ -1,15 +1,15 @@
 const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
 
-const paymentMethodSchema = new mongoose.Schema(
+const paymentSchema = new mongoose.Schema(
   {
-    id: {
+    payment_method_id: {
       type: String,
       required: true,
       unique: true,
       default: () => uuidv4(),
     },
-    userId: { type: String, required: true, index: true },
+    user_id: { type: String, required: true, index: true },
     provider: {
       type: String,
       enum: ["demo", "razorpay"],
@@ -19,11 +19,11 @@ const paymentMethodSchema = new mongoose.Schema(
     last4: { type: String, required: true },
     expiryMonth: { type: Number, required: true },
     expiryYear: { type: Number, required: true },
-    providerCustomerId: String,
-    providerTokenReference: String,
+    // providerCustomerId: String,
+    // providerTokenReference: String,
   },
   { timestamps: true }
 );
 
-const PaymentMethod = mongoose.model("PaymentMethod", paymentMethodSchema);
+const PaymentMethod = mongoose.model("PaymentMethod", paymentSchema);
 module.exports = PaymentMethod;
