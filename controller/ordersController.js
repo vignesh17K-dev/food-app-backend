@@ -134,12 +134,12 @@ const createOrder = asyncHandler(async (req, res) => {
     res.status(201).json({
         status: 201,
         data: {
-            order: formatOrderResponse(order),
-            razorpay: {
-                orderId: razorpayOrder.id,
+            order_data: formatOrderResponse(order),
+            razorpay_data: {
+                razorpayOrderId: razorpayOrder.id,
                 amount: razorpayOrder.amount,
                 currency: razorpayOrder.currency,
-                keyId: process.env.RAZORPAY_KEY_ID,
+                razorpayKeyId: process.env.RAZORPAY_KEY_ID,
             },
         },
         message: "Order created successfully",
