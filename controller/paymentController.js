@@ -1,5 +1,5 @@
 const asyncHandler = require("express-async-handler");
-const { validate: validateUuid } = require("uuid");
+const { v4: uuidv4, validate: validateUuid } = require("uuid");
 const PaymentMethod = require("../models/paymentModel");
 
 const getUserId = (req) => req?.user?.id;
@@ -40,7 +40,6 @@ const addCard = asyncHandler(async (req, res) => {
   if (!/^\d{4}$/.test(String(last4))) {
     return res.status(400).json({ message: "last4 must be four digits" });
   }
-
   const month = Number(expiryMonth);
   const year = Number(expiryYear);
 
@@ -55,7 +54,9 @@ const addCard = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Invalid expiry date" });
   }
 
+
   const card = await PaymentMethod.create({
+    payment_method_id: uuidv4(),
     user_id,
     provider: "demo",
     brand,
