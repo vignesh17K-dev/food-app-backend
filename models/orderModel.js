@@ -1,0 +1,62 @@
+const mongoose = require("mongoose");
+const { v4: uuidv4 } = require("uuid");
+const { cartItemSchema } = require("./cartModel");
+
+const paymentDetailsSchema = new mongoose.Schema(
+  {
+    payment_method_id: { type: String, required: true },
+    provider: {
+      type: String,
+      enum: ["demo", "razorpay"],
+      required: true,
+    },
+    brand: { type: String, required: true },
+    last4: { type: String, required: true },
+    expiryMonth: { type: Number, required: true },
+    expiryYear: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+const cartDetailsSchema = new mongoose.Schema(
+  {
+    cart_id: { type: String, required: true },
+    cart_total: { type: Number, required: true },
+    products: {
+        type: Map,
+        of: {
+          type: Map,
+          of: cartItemSchema,
+        },
+        default: {},
+      },
+  },
+  { _id: false }
+);
+
+
+const orderModelSchema = new mongoose.Schema(
+  {
+    order_id: {
+      type: String,
+      required: true,
+      unique: true,
+      default: () => uuidv4(),
+    },
+    user_id: { type: String, required: true, index: true },
+    cart_details: { type: cartDetailsSchema, required: true },
+    total: { type: Number, required: true },
+    payment_details: { type: paymentDetailsSchema, required: true },
+    razorpayOrderId: { type: String, required: true, unique: true },
+    currency: { type: String, default: "INR" },
+    status: {
+      type: String,
+      enum: ["created", "paid", "failed"],
+      default: "created",
+    },
+  },
+  { timestamps: true }
+);
+
+const Order = mongoose.model("OrderModel", orderModelSchema);
+module.exports = Order;
