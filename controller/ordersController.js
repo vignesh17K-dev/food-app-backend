@@ -64,7 +64,7 @@ const createOrder = asyncHandler(async (req, res) => {
         brand: paymentMethod.brand,
     };
 
-    const cart = await Cart.findOne({ cart_id });
+    const cart = await Cart.findOne({ cart_id, user_id });
     if (!cart) {
         return res.status(404).json({
             status: 404,
@@ -106,6 +106,8 @@ const createOrder = asyncHandler(async (req, res) => {
         razorpayOrderId: razorpayOrder.id,
         currency: razorpayOrder.currency || "INR",
     });
+
+    await Cart.findOneAndDelete({ cart_id, user_id });
 
     res.status(201).json({
         status: 201,
