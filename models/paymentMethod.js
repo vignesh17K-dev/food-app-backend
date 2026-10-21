@@ -22,7 +22,7 @@ const paymentMethodSchema = new mongoose.Schema(
     providerCustomerId: String,
     providerTokenReference: String,
   },
-  { _id: false, timestamps: true }
+  { timestamps: true }
 );
 
 const PaymentMethod = mongoose.model("PaymentMethod", paymentMethodSchema);
