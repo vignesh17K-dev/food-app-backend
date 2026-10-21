@@ -16,6 +16,7 @@ const paymentSchema = new mongoose.Schema(
       required: true,
     },
     brand: { type: String, required: true },
+    cardholderName: { type: String, required: true, trim: true },
     last4: { type: String, required: true },
     expiryMonth: { type: Number, required: true },
     expiryYear: { type: Number, required: true },

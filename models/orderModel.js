@@ -11,6 +11,7 @@ const paymentDetailsSchema = new mongoose.Schema(
       required: true,
     },
     brand: { type: String, required: true },
+    cardholderName: { type: String, required: true },
   },
   { _id: false }
 );

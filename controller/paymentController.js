@@ -12,7 +12,7 @@ const getAllCards = asyncHandler(async (req, res) => {
 
   const cards = await PaymentMethod.find({ user_id })
     .select(
-      "payment_method_id provider brand last4 expiryMonth expiryYear createdAt"
+      "payment_method_id provider brand cardholderName last4 expiryMonth expiryYear createdAt"
     )
     .sort({ createdAt: -1 })
     .lean();
@@ -31,7 +31,14 @@ const addCard = asyncHandler(async (req, res) => {
     return res.status(401).json({ message: "User Id is required" });
   }
 
-  const { brand, last4, expiryMonth, expiryYear } = req.body;
+  const { brand, cardholderName, last4, expiryMonth, expiryYear } = req.body;
+
+  const name = String(cardholderName ?? "").trim();
+  if (name.length < 2 || name.length > 80) {
+    return res.status(400).json({
+      message: "cardholderName must be between 2 and 80 characters",
+    });
+  }
 
   if (!allowedBrands.includes(brand)) {
     return res.status(400).json({ message: "Invalid demo card brand" });
@@ -53,13 +60,12 @@ const addCard = asyncHandler(async (req, res) => {
   ) {
     return res.status(400).json({ message: "Invalid expiry date" });
   }
-
-
   const card = await PaymentMethod.create({
     payment_method_id: uuidv4(),
     user_id,
     provider: "demo",
     brand,
+    cardholderName: name,
     last4,
     expiryMonth: month,
     expiryYear: year,
@@ -71,9 +77,7 @@ const addCard = asyncHandler(async (req, res) => {
       payment_method_id: card.payment_method_id,
       provider: card.provider,
       brand: card.brand,
-      last4: card.last4,
-      expiryMonth: card.expiryMonth,
-      expiryYear: card.expiryYear,
+      cardholderName: card?.cardholderName,
     },
     message: "Demo card added. It cannot be used for payment.",
   });

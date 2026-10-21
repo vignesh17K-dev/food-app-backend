@@ -62,6 +62,7 @@ const createOrder = asyncHandler(async (req, res) => {
         payment_method_id: paymentMethod.payment_method_id,
         provider: paymentMethod.provider,
         brand: paymentMethod.brand,
+        cardholderName: paymentMethod.cardholderName,
     };
 
     const cart = await Cart.findOne({ cart_id, user_id });
