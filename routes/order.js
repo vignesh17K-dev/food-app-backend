@@ -6,6 +6,6 @@ const router = express.Router();
 
 
 router.use(validateRoutes);
-router.route('/create-order').post(createOrder);
+router.route('/create_order').post(createOrder);
 
 module.exports = router;

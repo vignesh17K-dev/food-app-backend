@@ -11,9 +11,7 @@ const paymentDetailsSchema = new mongoose.Schema(
       required: true,
     },
     brand: { type: String, required: true },
-    last4: { type: String, required: true },
-    expiryMonth: { type: Number, required: true },
-    expiryYear: { type: Number, required: true },
+    cardholderName: { type: String, required: true },
   },
   { _id: false }
 );
@@ -58,5 +56,5 @@ const orderModelSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Order = mongoose.model("OrderModel", orderModelSchema);
+const Order = mongoose.model("Order", orderModelSchema);
 module.exports = Order;
