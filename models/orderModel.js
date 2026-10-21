@@ -11,9 +11,7 @@ const paymentDetailsSchema = new mongoose.Schema(
       required: true,
     },
     brand: { type: String, required: true },
-    last4: { type: String, required: true },
-    expiryMonth: { type: Number, required: true },
-    expiryYear: { type: Number, required: true },
+    cardholderName: { type: String, required: true },
   },
   { _id: false }
 );
@@ -45,8 +43,8 @@ const orderModelSchema = new mongoose.Schema(
     },
     user_id: { type: String, required: true, index: true },
     cart_details: { type: cartDetailsSchema, required: true },
-    total: { type: Number, required: true },
-    payment_details: { type: paymentDetailsSchema, required: true },
+    amount: { type: Number, required: true },
+    payment_details: { type: paymentDetailsSchema, required: false },
     razorpayOrderId: { type: String, required: true, unique: true },
     currency: { type: String, default: "INR" },
     status: {
@@ -58,5 +56,5 @@ const orderModelSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Order = mongoose.model("OrderModel", orderModelSchema);
+const Order = mongoose.model("Order", orderModelSchema);
 module.exports = Order;
