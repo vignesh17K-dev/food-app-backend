@@ -147,6 +147,7 @@ const createOrder = asyncHandler(async (req, res) => {
 });
 
 
+
 const verifyOrder = asyncHandler(async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
@@ -270,8 +271,6 @@ const verifyOrder = asyncHandler(async (req, res) => {
             error: error.message,
         });
     }
-
-
 
 
 });

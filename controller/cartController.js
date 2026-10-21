@@ -90,6 +90,7 @@ const ensureProductMap = (cart, product_id) => {
   return cart.products.get(product_id);
 };
 
+
 const findVariantBySize = (variantsMap, selectedSize) => {
   if (!variantsMap) return null;
   for (const [cart_item_id, item] of variantsMap.entries()) {
@@ -222,7 +223,7 @@ const updateProductToCart = asyncHandler(async (req, res) => {
       });
     }
 
-    const cart = await getOrCreateCart(cart_id , user_id);
+    const cart = await getOrCreateCart(cart_id, user_id);
 
     // Update / remove existing line by cart_item_id
     if (cart_item_id) {
@@ -343,7 +344,7 @@ const updateProductToCart = asyncHandler(async (req, res) => {
 const removeProductFromCart = asyncHandler(async (req, res) => {
   try {
     const cart_id = req?.body?.cart_id;
-    const { product_id, cart_item_id  } = req.body;
+    const { product_id, cart_item_id } = req.body;
 
     if (!product_id || !cart_item_id || !cart_id) {
       return res.status(400).json({
