@@ -21,15 +21,23 @@ const cartDetailsSchema = new mongoose.Schema(
     cart_id: { type: String, required: true },
     cart_total: { type: Number, required: true },
     products: {
+      type: Map,
+      of: {
         type: Map,
-        of: {
-          type: Map,
-          of: cartItemSchema,
-        },
-        default: {},
+        of: cartItemSchema,
       },
+      default: {},
+    },
   },
   { _id: false }
+);
+
+const DeliveryAddressSchema = new mongoose.Schema(
+  {
+    formattedAddress: { type: String, required: true },
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true },
+  },
 );
 
 
@@ -44,7 +52,7 @@ const orderModelSchema = new mongoose.Schema(
     user_id: { type: String, required: true, index: true },
     cart_details: { type: cartDetailsSchema, required: true },
     amount: { type: Number, required: true },
-    delivery_address: { type: String, required: true },
+    delivery_address: { type: DeliveryAddressSchema, required: true },
     payment_details: { type: paymentDetailsSchema, required: false },
     razorpayOrderId: { type: String, required: true, unique: true },
     currency: { type: String, default: "INR" },

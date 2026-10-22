@@ -36,7 +36,7 @@ const createOrder = asyncHandler(async (req, res) => {
         });
     }
 
-    if (!delivery_address) {
+    if (!delivery_address?.formattedAddress || !delivery_address?.latitude || !delivery_address?.longitude) {
         return res.status(400).json({
             status: 400,
             message: "delivery_address is required",
