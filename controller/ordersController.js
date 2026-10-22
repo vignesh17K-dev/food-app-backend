@@ -23,7 +23,7 @@ const createOrder = asyncHandler(async (req, res) => {
         });
     }
 
-    const { cart_id, payment_method_id = '', provider } = req.body;
+    const { cart_id, payment_method_id = '', provider, delivery_address } = req.body;
     const is_razorpay = provider === "razorpay";
     const razorpay_key_id = process.env.RAZORPAY_KEY_ID;
     let payment_details;
@@ -33,6 +33,13 @@ const createOrder = asyncHandler(async (req, res) => {
         return res.status(400).json({
             status: 400,
             message: "cart_id is required",
+        });
+    }
+
+    if (!delivery_address) {
+        return res.status(400).json({
+            status: 400,
+            message: "delivery_address is required",
         });
     }
 
@@ -116,6 +123,7 @@ const createOrder = asyncHandler(async (req, res) => {
             cart_total: cart?.cart_total,
             products: cart?.products,
         },
+        delivery_address: delivery_address,
         amount: cart?.cart_total,
         razorpayOrderId: razorpayOrder?.id,
         currency: razorpayOrder?.currency || "INR",

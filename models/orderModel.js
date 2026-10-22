@@ -44,6 +44,7 @@ const orderModelSchema = new mongoose.Schema(
     user_id: { type: String, required: true, index: true },
     cart_details: { type: cartDetailsSchema, required: true },
     amount: { type: Number, required: true },
+    delivery_address: { type: String, required: true },
     payment_details: { type: paymentDetailsSchema, required: false },
     razorpayOrderId: { type: String, required: true, unique: true },
     currency: { type: String, default: "INR" },
