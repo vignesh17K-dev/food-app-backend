@@ -56,7 +56,7 @@ const orderModelSchema = new mongoose.Schema(
     payment_details: { type: paymentDetailsSchema, required: false },
     razorpayOrderId: { type: String, required: true, unique: true },
     currency: { type: String, default: "INR" },
-    status: {
+    payment_status: {
       type: String,
       enum: ["created", "paid", "failed"],
       default: "created",

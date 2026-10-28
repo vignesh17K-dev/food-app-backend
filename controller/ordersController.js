@@ -127,7 +127,7 @@ const createOrder = asyncHandler(async (req, res) => {
         amount: cart?.cart_total,
         razorpayOrderId: razorpayOrder?.id,
         currency: razorpayOrder?.currency || "INR",
-        status: is_razorpay ? "created" : "paid",
+        payment_status: is_razorpay ? "created" : "paid",
         razorpay_key_id: razorpay_key_id
     };
 
@@ -153,7 +153,6 @@ const createOrder = asyncHandler(async (req, res) => {
         message: "Order created successfully",
     });
 });
-
 
 
 const verifyOrder = asyncHandler(async (req, res) => {
@@ -237,14 +236,14 @@ const verifyOrder = asyncHandler(async (req, res) => {
 
         // Prevent a second payment from being attached to an
         // order that has already been paid.
-        if (appOrder.status === "paid") {
+        if (appOrder.payment_status === "paid") {
             if (
                 appOrder.payment_details?.payment_method_id ===
                 razorpay_payment_id
             ) {
                 return res.json({
                     verified: true,
-                    status: "paid",
+                    payment_status: "paid",
                     message: "Payment already verified",
                 });
             }
@@ -255,7 +254,7 @@ const verifyOrder = asyncHandler(async (req, res) => {
             });
         }
 
-        appOrder.status = "paid";
+        appOrder.payment_status = "paid";
         appOrder.payment_details = {
             payment_method_id: razorpay_payment_id,
             provider: "razorpay",
@@ -268,9 +267,9 @@ const verifyOrder = asyncHandler(async (req, res) => {
 
         return res.json({
             verified: true,
-            status: 'paid',
+            payment_status: "paid",
             paymentId: razorpay_payment_id,
-            message: 'Payment verified successfully',
+            message: "Payment verified successfully",
         });
     } catch (error) {
         return res.status(500).json({
@@ -283,4 +282,24 @@ const verifyOrder = asyncHandler(async (req, res) => {
 
 });
 
-module.exports = { createOrder, verifyOrder };
+
+const getOrders = asyncHandler(async (req, res) => {
+    const user_id = req?.user?.id;
+    if (!user_id) {
+        return res.status(401).json({
+            status: 401,
+            message: "User Id is required",
+        });
+    }
+
+    const order_list = await Order.find({ user_id }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+        status: 200,
+        data: order_list,
+        message: "Orders fetched successfully",
+    });
+
+});
+
+module.exports = { createOrder, verifyOrder  , getOrders};
