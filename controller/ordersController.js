@@ -105,7 +105,7 @@ const createOrder = asyncHandler(async (req, res) => {
 
     const razorpayOrder = await razorpay.orders.create({
         amount: amountPaise,
-        currency: "INR",
+        currency: "USD",
         receipt: `food_${cart_id.replace(/-/g, "").slice(0, 20)}`,
     });
 
@@ -126,7 +126,7 @@ const createOrder = asyncHandler(async (req, res) => {
         delivery_address: delivery_address,
         amount: cart?.cart_total,
         razorpayOrderId: razorpayOrder?.id,
-        currency: razorpayOrder?.currency || "INR",
+        currency: razorpayOrder?.currency || "USD",
         payment_status: is_razorpay ? "created" : "paid",
         razorpay_key_id: razorpay_key_id
     };
