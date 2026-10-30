@@ -17,15 +17,15 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-app.use(
-  express.json({
-    verify: (req, _res, buf) => {
-      // Required for QStash signature verification on /api/order/advance_status
-      req.rawBody = buf.toString("utf8");
-    },
-  })
-);
+app.use(express.json())
+// app.use(
+//   express.json({
+//     verify: (req, _res, buf) => {
+//       // Required for QStash signature verification on /api/order/advance_status
+//       req.rawBody = buf.toString("utf8");
+//     },
+//   })
+// );
 app.use('/api/products', require('./routes/getProducts'));
 app.use("/api/wishlist", require('./routes/wishlist'));
 app.use("/api/cart", require('./routes/cart'));
