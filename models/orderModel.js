@@ -52,6 +52,11 @@ const orderModelSchema = new mongoose.Schema(
     user_id: { type: String, required: true, index: true },
     cart_details: { type: cartDetailsSchema, required: true },
     amount: { type: Number, required: true },
+    order_status: {
+      type: String,
+      enum: ["confirmed", "prepared", "out_for_delivery", "delivered", "cancelled"],
+      default: "confirmed",
+    },
     delivery_address: { type: DeliveryAddressSchema, required: true },
     payment_details: { type: paymentDetailsSchema, required: false },
     razorpayOrderId: { type: String, required: true, unique: true },

@@ -6,7 +6,7 @@ const Cart = require("../models/cartModel");
 const PaymentMethod = require("../models/paymentModel");
 const Order = require("../models/orderModel");
 const { publishToUser } = require("../config/pusher");
-
+const { scheduleNextStatus } = require("../services/orderStatusService");
 
 const formatOrderResponse = (order) => {
     if (!order) return null;
@@ -134,18 +134,25 @@ const createOrder = asyncHandler(async (req, res) => {
 
     if (!is_razorpay) {
         orderPayload.payment_details = payment_details;
+        orderPayload.order_status = "confirmed";
     }
 
     const order = await Order.create(orderPayload);
 
     await Cart.findOneAndDelete({ cart_id, user_id });
 
-    await publishToUser(user_id, "order-created", {
-      order_id: order.order_id,
-      payment_status: order.payment_status,
-      amount: order.amount,
-      currency: order.currency,
-    });
+    if (!is_razorpay) {
+        await publishToUser(user_id, "order-status-updated", {
+            order_id: order.order_id,
+            payment_status: order.payment_status,
+            amount: order.amount,
+            currency: order.currency,
+            order_status: order.order_status,
+        });
+
+        await scheduleNextStatus(order?.order_id, order.order_status);
+
+    }
 
     res.status(201).json({
         status: 201,
@@ -263,6 +270,7 @@ const verifyOrder = asyncHandler(async (req, res) => {
         }
 
         appOrder.payment_status = "paid";
+        appOrder.order_status = "confirmed";
         appOrder.payment_details = {
             payment_method_id: razorpay_payment_id,
             provider: "razorpay",
@@ -272,12 +280,16 @@ const verifyOrder = asyncHandler(async (req, res) => {
         };
         await appOrder.save();
 
-        await publishToUser(appOrder.user_id, "order-paid", {
+        await publishToUser(appOrder.user_id, "order-status-updated", {
             order_id: appOrder.order_id,
             payment_status: appOrder.payment_status,
             amount: appOrder.amount,
             currency: appOrder.currency,
+            order_status: appOrder.order_status,
         });
+
+        await scheduleNextStatus(appOrder?.order_id, appOrder.order_status);
+
 
         return res.json({
             verified: true,
@@ -292,8 +304,6 @@ const verifyOrder = asyncHandler(async (req, res) => {
             error: error.message,
         });
     }
-
-
 });
 
 
@@ -316,4 +326,4 @@ const getOrders = asyncHandler(async (req, res) => {
 
 });
 
-module.exports = { createOrder, verifyOrder  , getOrders};
+module.exports = { createOrder, verifyOrder, getOrders };
