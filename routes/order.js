@@ -5,12 +5,12 @@ const {
   verifyOrder,
   getOrders,
 } = require("../controller/ordersController");
-// const { advanceStatus } = require("../controller/advanceStatusController");
+const { advanceStatus } = require("../controller/advanceStatusController");
 
 const router = express.Router();
 
 // QStash webhook — no user JWT (signature verified in controller)
-// router.route("/advance_status").post(advanceStatus);
+router.route("/advance_status").post(advanceStatus);
 
 router.use(validateRoutes);
 router.route("/create_order").post(createOrder);

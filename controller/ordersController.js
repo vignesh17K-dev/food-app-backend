@@ -6,7 +6,7 @@ const Cart = require("../models/cartModel");
 const PaymentMethod = require("../models/paymentModel");
 const Order = require("../models/orderModel");
 const { publishToUser } = require("../config/pusher");
-// const { scheduleNextStatus } = require("../services/orderStatusService");
+const { scheduleNextStatus } = require("../services/orderStatusService");
 
 const formatOrderResponse = (order) => {
     if (!order) return null;
@@ -150,7 +150,7 @@ const createOrder = asyncHandler(async (req, res) => {
             order_status: order.order_status,
         });
 
-        // await scheduleNextStatus(order?.order_id, order.order_status);
+        await scheduleNextStatus(order?.order_id, order.order_status);
 
     }
 
@@ -288,7 +288,7 @@ const verifyOrder = asyncHandler(async (req, res) => {
             order_status: appOrder.order_status,
         });
 
-        // await scheduleNextStatus(appOrder?.order_id, appOrder.order_status);
+        await scheduleNextStatus(appOrder?.order_id, appOrder.order_status);
 
 
         return res.json({

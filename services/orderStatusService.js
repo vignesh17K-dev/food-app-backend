@@ -23,22 +23,26 @@ const scheduleNextStatus = async (order_id, current_status) => {
     return;
   }
 
-  // Must match routes/order.js: POST /api/order/advance_status
-  const result = await qstash.publishJSON({
-    url: `${baseUrl}/api/order/advance_status`,
-    body: {
-      order_id: order_id.toString(),
-      expected_status: current_status,
-      next_status,
-    },
-    delay: "30s",
-  });
+  try {
+    // Must match routes/order.js: POST /api/order/advance_status
+    const result = await qstash.publishJSON({
+      url: `${baseUrl}/api/order/advance_status`,
+      body: {
+        order_id: order_id.toString(),
+        expected_status: current_status,
+        next_status,
+      },
+      delay: "30s",
+    });
 
-  console.log("Next order status scheduled:", {
-    order_id,
-    next_status,
-    messageId: result?.messageId,
-  });
+    console.log("Next order status scheduled:", {
+      order_id,
+      next_status,
+      messageId: result?.messageId,
+    });
+  } catch (err) {
+    console.error("scheduleNextStatus failed:", err?.message || err);
+  }
 };
 
 module.exports = { scheduleNextStatus };
