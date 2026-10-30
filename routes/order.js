@@ -5,7 +5,7 @@ const {
   verifyOrder,
   getOrders,
 } = require("../controller/ordersController");
-const { advanceStatus } = require("../controller/advanceStatusController");
+// const { advanceStatus } = require("../controller/advanceStatusController");
 
 const router = express.Router();
 
