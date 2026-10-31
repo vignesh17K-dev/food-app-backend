@@ -326,4 +326,50 @@ const getOrders = asyncHandler(async (req, res) => {
 
 });
 
-module.exports = { createOrder, verifyOrder, getOrders };
+const getOrder = asyncHandler(async (req, res) => {
+    const user_id = req?.user?.id;
+    if (!user_id) {
+        return res.status(401).json({
+            status: 401,
+            message: "User Id is required",
+        });
+    }
+
+    const { order_id } = req.params;
+    if (!order_id) {
+        return res.status(400).json({
+            status: 400,
+            message: "order_id is required",
+        });
+    }
+
+    if (!validateUuid(order_id)) {
+        return res.status(400).json({
+            status: 400,
+            message: "Invalid order_id",
+        });
+    }
+    try {
+        const order = await Order.findOne({ order_id, user_id });
+        if (!order) {
+            return res.status(404).json({
+                status: 404,
+                message: "Order not found",
+            });
+        }
+
+        return res.status(200).json({
+            status: 200,
+            data: formatOrderResponse(order),
+            message: "Order fetched successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: 500,
+            message: "Error fetching order",
+            error: error.message,
+        });
+    }
+});
+
+module.exports = { createOrder, verifyOrder, getOrders, getOrder };
