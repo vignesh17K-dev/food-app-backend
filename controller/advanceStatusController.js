@@ -3,6 +3,7 @@ const { scheduleNextStatus } = require("../services/orderStatusService");
 const Order = require("../models/orderModel");
 const { receiver } = require("../config/qstash");
 const { publishToUser } = require("../config/pusher");
+const { getFirstRestaurantFromOrder } = require("../services/orderRestaurant");
 
 const STATUS_SEQUENCE = {
   confirmed: "prepared",
@@ -79,6 +80,7 @@ const advanceStatus = expressAsyncHandler(async (req, res) => {
       amount: order.amount,
       currency: order.currency,
       estimated_delivery_time: order.estimated_delivery_time,
+      restaurant: getFirstRestaurantFromOrder(order),
     });
 
     await scheduleNextStatus(order.order_id, next_status);

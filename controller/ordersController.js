@@ -7,6 +7,7 @@ const PaymentMethod = require("../models/paymentModel");
 const Order = require("../models/orderModel");
 const { publishToUser } = require("../config/pusher");
 const { scheduleNextStatus } = require("../services/orderStatusService");
+const { getFirstRestaurantFromOrder } = require("../services/orderRestaurant");
 
 const ESTIMATED_DELIVERY_MS = 3 * 60 * 1000; // 3 minutes from createdAt
 
@@ -156,6 +157,7 @@ const createOrder = asyncHandler(async (req, res) => {
             currency: order.currency,
             order_status: order.order_status,
             estimated_delivery_time: order.estimated_delivery_time,
+            restaurant: getFirstRestaurantFromOrder(order),
         });
 
         await scheduleNextStatus(order?.order_id, order.order_status);
@@ -297,6 +299,7 @@ const verifyOrder = asyncHandler(async (req, res) => {
             currency: appOrder.currency,
             order_status: appOrder.order_status,
             estimated_delivery_time: appOrder.estimated_delivery_time,
+            restaurant: getFirstRestaurantFromOrder(appOrder),
         });
 
         await scheduleNextStatus(appOrder?.order_id, appOrder.order_status);
