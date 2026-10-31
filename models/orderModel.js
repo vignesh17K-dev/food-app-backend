@@ -61,6 +61,8 @@ const orderModelSchema = new mongoose.Schema(
     payment_details: { type: paymentDetailsSchema, required: false },
     razorpayOrderId: { type: String, required: true, unique: true },
     currency: { type: String, default: "INR" },
+    // Absolute ETA: set once at confirm as createdAt + 2 minutes
+    estimated_delivery_time: { type: Date },
     payment_status: {
       type: String,
       enum: ["created", "paid", "failed"],

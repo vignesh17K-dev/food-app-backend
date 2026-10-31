@@ -8,12 +8,18 @@ const Order = require("../models/orderModel");
 const { publishToUser } = require("../config/pusher");
 const { scheduleNextStatus } = require("../services/orderStatusService");
 
+const ESTIMATED_DELIVERY_MS = 2 * 60 * 1000; // 2 minutes from createdAt
+
 const formatOrderResponse = (order) => {
     if (!order) return null;
     return order.toObject
         ? order.toObject({ flattenMaps: true })
         : order;
 };
+
+/** Fixed ETA: createdAt (or now) + 2 minutes. Status steps are ~30s each. */
+const estimatedDeliveryFrom = (from = new Date()) =>
+    new Date(new Date(from).getTime() + ESTIMATED_DELIVERY_MS);
 
 const createOrder = asyncHandler(async (req, res) => {
     const user_id = req?.user?.id;
@@ -135,6 +141,7 @@ const createOrder = asyncHandler(async (req, res) => {
     if (!is_razorpay) {
         orderPayload.payment_details = payment_details;
         orderPayload.order_status = "confirmed";
+        orderPayload.estimated_delivery_time = estimatedDeliveryFrom();
     }
 
     const order = await Order.create(orderPayload);
@@ -148,10 +155,10 @@ const createOrder = asyncHandler(async (req, res) => {
             amount: order.amount,
             currency: order.currency,
             order_status: order.order_status,
+            estimated_delivery_time: order.estimated_delivery_time,
         });
 
         await scheduleNextStatus(order?.order_id, order.order_status);
-
     }
 
     res.status(201).json({
@@ -271,6 +278,9 @@ const verifyOrder = asyncHandler(async (req, res) => {
 
         appOrder.payment_status = "paid";
         appOrder.order_status = "confirmed";
+        appOrder.estimated_delivery_time = estimatedDeliveryFrom(
+            appOrder.createdAt
+        );
         appOrder.payment_details = {
             payment_method_id: razorpay_payment_id,
             provider: "razorpay",
@@ -286,6 +296,7 @@ const verifyOrder = asyncHandler(async (req, res) => {
             amount: appOrder.amount,
             currency: appOrder.currency,
             order_status: appOrder.order_status,
+            estimated_delivery_time: appOrder.estimated_delivery_time,
         });
 
         await scheduleNextStatus(appOrder?.order_id, appOrder.order_status);

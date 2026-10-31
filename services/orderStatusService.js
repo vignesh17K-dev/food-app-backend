@@ -32,7 +32,7 @@ const scheduleNextStatus = async (order_id, current_status) => {
         expected_status: current_status,
         next_status,
       },
-      delay: "30s",
+      delay: process.env.ORDER_STATUS_DELAY || "30s",
     });
 
     console.log("Next order status scheduled:", {

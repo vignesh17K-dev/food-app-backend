@@ -78,6 +78,7 @@ const advanceStatus = expressAsyncHandler(async (req, res) => {
       payment_status: order.payment_status,
       amount: order.amount,
       currency: order.currency,
+      estimated_delivery_time: order.estimated_delivery_time,
     });
 
     await scheduleNextStatus(order.order_id, next_status);
