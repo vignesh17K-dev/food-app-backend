@@ -2376,6 +2376,97 @@ const mock_data = {
       sizes: ["Small", "Medium", "Large"],
     }
   ],
+  restaurants: [
+    {
+      id: "r1a10001-0001-4000-8000-000000000001",
+      name: "Burger House",
+      image: `${URL}/dummyData/restaurants/burger_house.jpg`,
+      logo: `${URL}/dummyData/restaurants/burger_house_logo.jpg`,
+      cuisine: ["american", "fast-food", "grill"],
+      deliveryTime: "20-30 mins",
+      deliveryDistance: 1.5,
+      rating: 4.2,
+      tags: ["burgers", "grill", "fast-food"],
+    },
+    {
+      id: "r1a10002-0002-4000-8000-000000000002",
+      name: "Taco Fiesta",
+      image: `${URL}/dummyData/restaurants/taco_fiesta.jpg`,
+      logo: `${URL}/dummyData/restaurants/taco_fiesta_logo.jpg`,
+      cuisine: ["mexican"],
+      deliveryTime: "15-25 mins",
+      deliveryDistance: 2.0,
+      rating: 4.5,
+      tags: ["mexican", "tacos", "spicy"],
+    },
+    {
+      id: "r1a10003-0003-4000-8000-000000000003",
+      name: "Spice Kitchen",
+      image: `${URL}/dummyData/restaurants/spice_kitchen.jpg`,
+      logo: `${URL}/dummyData/restaurants/spice_kitchen_logo.jpg`,
+      cuisine: ["indian", "asian"],
+      deliveryTime: "30-40 mins",
+      deliveryDistance: 3.2,
+      rating: 4.4,
+      tags: ["indian", "asian", "spicy", "rice"],
+    },
+    {
+      id: "r1a10004-0004-4000-8000-000000000004",
+      name: "Pizza Corner",
+      image: `${URL}/dummyData/restaurants/pizza_corner.jpg`,
+      logo: `${URL}/dummyData/restaurants/pizza_corner_logo.jpg`,
+      cuisine: ["italian", "pizza"],
+      deliveryTime: "25-35 mins",
+      deliveryDistance: 2.5,
+      rating: 4.3,
+      tags: ["pizza", "italian", "baked"],
+    },
+    {
+      id: "r1a10005-0005-4000-8000-000000000005",
+      name: "Green Bowl",
+      image: `${URL}/dummyData/restaurants/green_bowl.jpg`,
+      logo: `${URL}/dummyData/restaurants/green_bowl_logo.jpg`,
+      cuisine: ["healthy", "salads"],
+      deliveryTime: "15-25 mins",
+      deliveryDistance: 1.8,
+      rating: 4.6,
+      tags: ["healthy", "salad", "veg"],
+    },
+    {
+      id: "r1a10006-0006-4000-8000-000000000006",
+      name: "Sweet Spot",
+      image: `${URL}/dummyData/restaurants/sweet_spot.jpg`,
+      logo: `${URL}/dummyData/restaurants/sweet_spot_logo.jpg`,
+      cuisine: ["desserts"],
+      deliveryTime: "20-30 mins",
+      deliveryDistance: 2.2,
+      rating: 4.7,
+      tags: ["dessert", "sweet", "bakery"],
+    },
+    {
+      id: "r1a10007-0007-4000-8000-000000000007",
+      name: "Pasta Prima",
+      image: `${URL}/dummyData/restaurants/pasta_prima.jpg`,
+      logo: `${URL}/dummyData/restaurants/pasta_prima_logo.jpg`,
+      cuisine: ["italian", "pasta"],
+      deliveryTime: "25-35 mins",
+      deliveryDistance: 2.8,
+      rating: 4.4,
+      tags: ["pasta", "italian"],
+    },
+    {
+      id: "r1a10008-0008-4000-8000-000000000008",
+      name: "Fresh Sips",
+      image: `${URL}/dummyData/restaurants/fresh_sips.jpg`,
+      logo: `${URL}/dummyData/restaurants/fresh_sips_logo.jpg`,
+      cuisine: ["beverages"],
+      deliveryTime: "10-20 mins",
+      deliveryDistance: 1.2,
+      rating: 4.5,
+      tags: ["drinks", "juice", "coffee"],
+    },
+  ],
+
   categories: [
     {
       id: "c1a10001-0001-4000-8000-000000000001",
@@ -2566,4 +2657,175 @@ const mock_data = {
   ],
 };
 
+
+const CATEGORY_IDS = {
+  FAST: "c1a10001-0001-4000-8000-000000000001",
+  FRUIT: "c1a10002-0002-4000-8000-000000000002",
+  RICE: "c1a10003-0003-4000-8000-000000000003",
+  BEV: "c1a10004-0004-4000-8000-000000000004",
+  DESSERT: "c1a10005-0005-4000-8000-000000000005",
+  SALAD: "c1a10006-0006-4000-8000-000000000006",
+  PASTA: "c1a10007-0007-4000-8000-000000000007",
+  PIZZA: "c1a10008-0008-4000-8000-000000000008",
+};
+
+const RESTAURANT_BY_SLUG = {
+  burger_house: "r1a10001-0001-4000-8000-000000000001",
+  taco_fiesta: "r1a10002-0002-4000-8000-000000000002",
+  spice_kitchen: "r1a10003-0003-4000-8000-000000000003",
+  pizza_corner: "r1a10004-0004-4000-8000-000000000004",
+  green_bowl: "r1a10005-0005-4000-8000-000000000005",
+  sweet_spot: "r1a10006-0006-4000-8000-000000000006",
+  pasta_prima: "r1a10007-0007-4000-8000-000000000007",
+  fresh_sips: "r1a10008-0008-4000-8000-000000000008",
+};
+
+const nameIncludesAny = (name, words) => words.some((w) => name.includes(w));
+
+const resolveRestaurantSlug = (product) => {
+  const tags = (product.tags || []).map((t) => t.toLowerCase());
+  const cats = product.categories || [];
+  const name = (product.name || "").toLowerCase();
+  const hasTag = (t) => tags.includes(t);
+  const hasCat = (c) => cats.includes(c);
+
+  // Cuisine/name rules before category — some seed categories are wrong
+  if (hasTag("pizza") || hasCat(CATEGORY_IDS.PIZZA) || name.includes("pizza")) {
+    return "pizza_corner";
+  }
+
+  if (
+    hasTag("mexican") ||
+    nameIncludesAny(name, ["taco", "burrito", "quesadilla", "nacho"])
+  ) {
+    return "taco_fiesta";
+  }
+
+  if (
+    hasTag("pasta") ||
+    hasCat(CATEGORY_IDS.PASTA) ||
+    nameIncludesAny(name, [
+      "pasta",
+      "spaghetti",
+      "alfredo",
+      "lasagna",
+      "ravioli",
+      "penne",
+      "carbonara",
+      "risotto",
+      "parmesan",
+    ]) ||
+    (hasTag("italian") &&
+      !name.includes("pizza") &&
+      !nameIncludesAny(name, ["tiramisu", "panna cotta", "caprese"]))
+  ) {
+    return "pasta_prima";
+  }
+
+  if (nameIncludesAny(name, ["tiramisu", "panna cotta"])) {
+    return "sweet_spot";
+  }
+
+  if (
+    hasCat(CATEGORY_IDS.BEV) ||
+    nameIncludesAny(name, [
+      "juice",
+      "smoothie",
+      "iced tea",
+      "lemon iced",
+      "coffee",
+      "latte",
+      "shake",
+      "lemonade",
+      "soda",
+      "mocktail",
+      "coconut water",
+      "cold brew",
+      "matcha",
+    ])
+  ) {
+    return "fresh_sips";
+  }
+
+  if (
+    hasTag("indian") ||
+    hasTag("asian") ||
+    hasCat(CATEGORY_IDS.RICE) ||
+    nameIncludesAny(name, [
+      "biryani",
+      "curry",
+      "tandoori",
+      "naan",
+      "tikka",
+      "paneer",
+      "dal",
+      "masala",
+      "fried rice",
+      "tom yum",
+      "thai",
+      "ramen",
+      "sushi",
+      "pad thai",
+      "dumpling",
+      "shawarma",
+      "peking",
+    ])
+  ) {
+    return "spice_kitchen";
+  }
+
+  if (
+    hasCat(CATEGORY_IDS.DESSERT) ||
+    nameIncludesAny(name, [
+      "cake",
+      "brownie",
+      "ice cream",
+      "sundae",
+      "cookie",
+      "donut",
+      "pastry",
+      "pudding",
+      "mousse",
+      "cheesecake",
+      "pie",
+      "waffle",
+      "churro",
+      "macaron",
+      "banana split",
+      "pancake",
+      "croissant",
+    ])
+  ) {
+    return "sweet_spot";
+  }
+
+  if (
+    hasCat(CATEGORY_IDS.SALAD) ||
+    hasCat(CATEGORY_IDS.FRUIT) ||
+    nameIncludesAny(name, ["salad", "wrap", "falafel", "avocado toast", "spring roll", "grilled veggies"]) ||
+    (hasTag("healthy") && !hasTag("burger") && !name.includes("burger"))
+  ) {
+    return "green_bowl";
+  }
+
+  return "burger_house";
+};
+
+const assignRestaurantIds = () => {
+  const byId = new Map();
+  for (const product of mock_data.products_data) {
+    const slug = resolveRestaurantSlug(product);
+    const restaurant_id = RESTAURANT_BY_SLUG[slug];
+    product.restaurant_id = restaurant_id;
+    byId.set(product.id, restaurant_id);
+  }
+  for (const detail of mock_data.product_details || []) {
+    detail.restaurant_id =
+      byId.get(detail.id) || RESTAURANT_BY_SLUG[resolveRestaurantSlug(detail)];
+  }
+};
+
+assignRestaurantIds();
+
 module.exports = mock_data;
+
