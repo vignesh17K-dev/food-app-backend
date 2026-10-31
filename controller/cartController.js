@@ -3,14 +3,43 @@ const mock_data = require("../data/products");
 const asyncHandler = require("express-async-handler");
 const { v4: uuidv4 } = require("uuid");
 
+const restaurantById = new Map(
+  (mock_data.restaurants || []).map((restaurant) => [
+    restaurant.id,
+    restaurant,
+  ]),
+);
+
+const restaurantSummary = (restaurant) => {
+  if (!restaurant) return null;
+  return {
+    id: restaurant.id,
+    name: restaurant.name,
+    image: restaurant.image,
+    logo: restaurant.logo,
+    rating: restaurant.rating,
+    deliveryTime: restaurant.deliveryTime,
+    deliveryDistance: restaurant.deliveryDistance,
+    cuisine: restaurant.cuisine,
+  };
+};
+
 const getProductById = (product_id) => {
   const listItem = mock_data.products_data?.find((p) => p.id === product_id);
   const detail = mock_data.product_details?.find((p) => p.id === product_id);
   if (!listItem && !detail) return null;
-  return {
+  const product = {
     ...(listItem || {}),
     ...(detail || {}),
     sizes: detail?.sizes || listItem?.sizes || [],
+  };
+  const restaurant = restaurantById.get(product.restaurant_id) || null;
+  return {
+    ...product,
+    deliveryTime: restaurant?.deliveryTime ?? product.deliveryTime,
+    deliveryDistance:
+      restaurant?.deliveryDistance ?? product.deliveryDistance,
+    restaurant: restaurantSummary(restaurant),
   };
 };
 
@@ -125,6 +154,8 @@ const buildCartItem = (
   deliveryDistance: product.deliveryDistance ?? 0,
   tags: product.tags || [],
   rating: product.rating ?? 0,
+  restaurant_id: product.restaurant_id || null,
+  restaurant: product.restaurant || null,
 });
 
 const initializeCart = asyncHandler(async (req, res) => {

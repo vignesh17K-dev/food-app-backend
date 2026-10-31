@@ -1,6 +1,20 @@
 const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
 
+const restaurantDataSchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true },
+    name: { type: String, required: true },
+    image: { type: String },
+    logo: { type: String },
+    rating: { type: Number },
+    deliveryTime: { type: String },
+    deliveryDistance: { type: Number },
+    cuisine: [{ type: String }],
+  },
+  { _id: false },
+);
+
 const cartItemSchema = new mongoose.Schema(
   {
     cart_item_id: { type: String, required: true },
@@ -19,6 +33,8 @@ const cartItemSchema = new mongoose.Schema(
     deliveryDistance: { type: Number, required: true },
     tags: [{ type: String, required: true }],
     rating: { type: Number, required: true },
+    restaurant_id: { type: String, required: false },
+    restaurant: { type: restaurantDataSchema, required: false },
   },
   { _id: false },
 );

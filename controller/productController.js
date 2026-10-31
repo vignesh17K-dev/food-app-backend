@@ -1,5 +1,4 @@
 const mock_data = require("../data/products");
-// const { v4: uuidv4 } = require("uuid");
 
 // Parses "25-30 mins" → 30 (upper bound in minutes)
 const parseDeliveryTimeMax = (deliveryTime) => {
@@ -9,11 +8,56 @@ const parseDeliveryTimeMax = (deliveryTime) => {
   return Math.max(...match.map(Number));
 };
 
+const restaurantById = new Map(
+  (mock_data.restaurants || []).map((restaurant) => [
+    restaurant.id,
+    restaurant,
+  ]),
+);
+
+const restaurantSummary = (restaurant) => {
+  if (!restaurant) return null;
+  return {
+    id: restaurant.id,
+    name: restaurant.name,
+    image: restaurant.image, // hero / cover
+    logo: restaurant.logo, // brand logo
+    rating: restaurant.rating,
+    deliveryTime: restaurant.deliveryTime,
+    deliveryDistance: restaurant.deliveryDistance,
+    cuisine: restaurant.cuisine,
+  };
+};
+
+const resolveRestaurant = (restaurant_id) =>
+  restaurantById.get(restaurant_id) || null;
+
+/** Prefer restaurant delivery/rating fields when linked; keep product fields as fallback. */
+const withRestaurant = (product) => {
+  if (!product) return product;
+  const restaurant = resolveRestaurant(product.restaurant_id);
+  const summary = restaurantSummary(restaurant);
+  return {
+    ...product,
+    deliveryTime: restaurant?.deliveryTime ?? product.deliveryTime,
+    deliveryDistance:
+      restaurant?.deliveryDistance ?? product.deliveryDistance,
+    restaurant: summary,
+  };
+};
+
 // POST /products — body: { search, filters, page, limit }
 const getProducts = (req, res) => {
   const { search, filters = {}, page = 1, limit = 5 } = req.body;
-  const { minPrice, maxPrice, rating, maxDeliveryTime, maxDistance, tags } =
-    filters;
+  const {
+    minPrice,
+    maxPrice,
+    rating,
+    maxDeliveryTime,
+    maxDistance,
+    tags,
+    restaurant_id,
+  } = filters;
 
   const searchTerm = search?.trim().toLowerCase() || null;
 
@@ -24,13 +68,28 @@ const getProducts = (req, res) => {
     : null;
 
   const filtered_products = mock_data.products_data?.filter((product) => {
+    const restaurant = resolveRestaurant(product.restaurant_id);
+    const deliveryTime =
+      restaurant?.deliveryTime ?? product.deliveryTime;
+    const deliveryDistance =
+      restaurant?.deliveryDistance ?? product.deliveryDistance;
+    const productRating = product.rating ?? restaurant?.rating ?? 0;
+
+    if (restaurant_id && product.restaurant_id !== restaurant_id) {
+      return false;
+    }
+
     if (searchTerm) {
       const nameMatch = product.name?.toLowerCase().includes(searchTerm);
       const descMatch = product.description?.toLowerCase().includes(searchTerm);
       const tagMatch = product.tags?.some((t) =>
         t.toLowerCase().includes(searchTerm),
       );
-      if (!nameMatch && !descMatch && !tagMatch) return false;
+      const restaurantMatch = restaurant?.name
+        ?.toLowerCase()
+        .includes(searchTerm);
+      if (!nameMatch && !descMatch && !tagMatch && !restaurantMatch)
+        return false;
     }
 
     if (minPrice !== undefined && product.price < parseFloat(minPrice))
@@ -40,19 +99,18 @@ const getProducts = (req, res) => {
 
     if (rating !== undefined) {
       const selectedRating = parseFloat(rating);
-      const productRating = product.rating ?? 0;
       if (productRating < selectedRating || productRating >= selectedRating + 1)
         return false;
     }
 
-    if (maxDeliveryTime !== undefined && product.deliveryTime) {
-      const upperMins = parseDeliveryTimeMax(product.deliveryTime);
+    if (maxDeliveryTime !== undefined && deliveryTime) {
+      const upperMins = parseDeliveryTimeMax(deliveryTime);
       if (upperMins !== null && upperMins > parseFloat(maxDeliveryTime))
         return false;
     }
 
-    if (maxDistance !== undefined && product.deliveryDistance !== undefined) {
-      if (product.deliveryDistance > parseFloat(maxDistance)) return false;
+    if (maxDistance !== undefined && deliveryDistance !== undefined) {
+      if (deliveryDistance > parseFloat(maxDistance)) return false;
     }
 
     if (parsedTags && product.tags) {
@@ -74,10 +132,9 @@ const getProducts = (req, res) => {
   const total_pages = total === 0 ? 0 : Math.ceil(total / product_limit);
 
   const start_index = (current_page - 1) * product_limit;
-  const paginated_products = filtered_products.slice(
-    start_index,
-    start_index + product_limit,
-  );
+  const paginated_products = filtered_products
+    .slice(start_index, start_index + product_limit)
+    .map(withRestaurant);
 
   res.status(200).json({
     status: 200,
@@ -99,7 +156,7 @@ const getPopularRails = (req, res) => {
     const product = mock_data.products_data.find(
       (product) => product?.id === id,
     );
-    return product;
+    return withRestaurant(product);
   });
 
   res.status(200).json({
@@ -115,7 +172,7 @@ const getMenuRails = (req, res) => {
       const product = mock_data.products_data.find(
         (product) => product?.id === id,
       );
-      return product;
+      return withRestaurant(product);
     });
     return {
       ...menu_item,
@@ -139,12 +196,65 @@ const getProductCategories = (req, res) => {
   });
 };
 
+// GET /restaurants
+const getRestaurants = (req, res) => {
+  const searchTerm = req.query?.search?.trim().toLowerCase() || null;
+  const cuisine = req.query?.cuisine?.trim().toLowerCase() || null;
+
+  let restaurants = mock_data.restaurants || [];
+
+  if (searchTerm) {
+    restaurants = restaurants.filter(
+      (restaurant) =>
+        restaurant.name?.toLowerCase().includes(searchTerm) ||
+        restaurant.tags?.some((t) => t.toLowerCase().includes(searchTerm)) ||
+        restaurant.cuisine?.some((c) => c.toLowerCase().includes(searchTerm)),
+    );
+  }
+
+  if (cuisine) {
+    restaurants = restaurants.filter((restaurant) =>
+      restaurant.cuisine?.some((c) => c.toLowerCase() === cuisine),
+    );
+  }
+
+  res.status(200).json({
+    status: 200,
+    data: restaurants,
+    message: "successfully fetched restaurants",
+  });
+};
+
+// GET /restaurants/:id
+const getRestaurantById = (req, res) => {
+  const restaurant = resolveRestaurant(req.params.id);
+  if (!restaurant) {
+    return res.status(404).json({
+      status: 404,
+      message: "Restaurant not found",
+    });
+  }
+
+  const menu = (mock_data.products_data || [])
+    .filter((product) => product.restaurant_id === restaurant.id)
+    .map(withRestaurant);
+
+  return res.status(200).json({
+    status: 200,
+    data: {
+      ...restaurant,
+      menu,
+    },
+    message: "successfully fetched restaurant",
+  });
+};
+
 //GET
 const getProductsByCategory = (req, res) => {
   const category_id = req?.params?.id;
-  const products = mock_data?.products_data?.filter((product) =>
-    product?.categories?.includes(category_id),
-  );
+  const products = mock_data?.products_data
+    ?.filter((product) => product?.categories?.includes(category_id))
+    .map(withRestaurant);
   res.status(200).json({
     status: 200,
     data: products,
@@ -158,9 +268,16 @@ const getProductDetails = (req, res) => {
     (product) => product?.id === req?.params?.id,
   );
 
+  if (!product) {
+    return res.status(404).json({
+      status: 404,
+      message: "Product not found",
+    });
+  }
+
   res.status(200).json({
     status: 200,
-    data: product,
+    data: withRestaurant(product),
     message: `successfully fetched detail ${req?.params?.id}`,
   });
 };
@@ -172,4 +289,6 @@ module.exports = {
   getPopularRails,
   getMenuRails,
   getProductsByCategory,
+  getRestaurants,
+  getRestaurantById,
 };
