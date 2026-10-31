@@ -8,7 +8,7 @@ const Order = require("../models/orderModel");
 const { publishToUser } = require("../config/pusher");
 const { scheduleNextStatus } = require("../services/orderStatusService");
 
-const ESTIMATED_DELIVERY_MS = 2 * 60 * 1000; // 2 minutes from createdAt
+const ESTIMATED_DELIVERY_MS = 3 * 60 * 1000; // 3 minutes from createdAt
 
 const formatOrderResponse = (order) => {
     if (!order) return null;
