@@ -32,14 +32,31 @@ const cartDetailsSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const DeliveryAddressSchema = new mongoose.Schema(
+const LocationWithAddressSchema = new mongoose.Schema(
   {
     formattedAddress: { type: String, required: true },
     latitude: { type: Number, required: true },
     longitude: { type: Number, required: true },
   },
+  { _id: false }
 );
 
+const DeliveryPartnerLocationSchema = new mongoose.Schema(
+  {
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+const DeliveryDetailSchema = new mongoose.Schema(
+  {
+    customer_location: { type: LocationWithAddressSchema, required: true },
+    restaurant_location: { type: LocationWithAddressSchema, required: true },
+    delivery_location: { type: DeliveryPartnerLocationSchema, required: true },
+  },
+  { _id: false }
+);
 
 const orderModelSchema = new mongoose.Schema(
   {
@@ -57,7 +74,7 @@ const orderModelSchema = new mongoose.Schema(
       enum: ["confirmed", "prepared", "out_for_delivery", "delivered", "cancelled"],
       default: "confirmed",
     },
-    delivery_address: { type: DeliveryAddressSchema, required: true },
+    delivery_detail: { type: DeliveryDetailSchema, required: true },
     payment_details: { type: paymentDetailsSchema, required: false },
     razorpayOrderId: { type: String, required: true, unique: true },
     currency: { type: String, default: "INR" },

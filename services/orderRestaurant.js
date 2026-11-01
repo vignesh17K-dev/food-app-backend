@@ -41,7 +41,36 @@ const getFirstRestaurantFromOrder = (order) => {
   return getFirstRestaurantFromProducts(products);
 };
 
+/** Map restaurant summary → address + lat/lng for delivery_detail.restaurant_location */
+const restaurantToLocation = (restaurant) => {
+  if (
+    !restaurant?.formattedAddress ||
+    restaurant.latitude == null ||
+    restaurant.longitude == null
+  ) {
+    return null;
+  }
+  return {
+    formattedAddress: restaurant.formattedAddress,
+    latitude: restaurant.latitude,
+    longitude: restaurant.longitude,
+  };
+};
+
+/** Partner pin starts at the restaurant (lat/lng only). */
+const restaurantToDeliveryLocation = (restaurant) => {
+  if (restaurant?.latitude == null || restaurant?.longitude == null) {
+    return null;
+  }
+  return {
+    latitude: restaurant.latitude,
+    longitude: restaurant.longitude,
+  };
+};
+
 module.exports = {
   getFirstRestaurantFromProducts,
   getFirstRestaurantFromOrder,
+  restaurantToLocation,
+  restaurantToDeliveryLocation,
 };

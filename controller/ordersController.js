@@ -31,7 +31,7 @@ const createOrder = asyncHandler(async (req, res) => {
         });
     }
 
-    const { cart_id, payment_method_id = '', provider, delivery_address } = req.body;
+    const { cart_id, payment_method_id = '', provider, delivery_detail } = req.body;
     const is_razorpay = provider === "razorpay";
     const razorpay_key_id = process.env.RAZORPAY_KEY_ID;
     let payment_details;
@@ -44,12 +44,37 @@ const createOrder = asyncHandler(async (req, res) => {
         });
     }
 
-    if (!delivery_address?.formattedAddress || !delivery_address?.latitude || !delivery_address?.longitude) {
+    const customer_location = delivery_detail?.customer_location;
+    const restaurant_location = delivery_detail?.restaurant_location;
+    if (
+        !customer_location?.formattedAddress ||
+        customer_location?.latitude == null ||
+        customer_location?.longitude == null
+    ) {
         return res.status(400).json({
             status: 400,
-            message: "delivery_address is required",
+            message:
+                "delivery_detail.customer_location (formattedAddress, latitude, longitude) is required",
         });
     }
+
+    if (
+        !restaurant_location?.formattedAddress ||
+        restaurant_location?.latitude == null ||
+        restaurant_location?.longitude == null
+    ) {
+        return res.status(400).json({
+            status: 400,
+            message:
+                "delivery_detail.restaurant_location (formattedAddress, latitude, longitude) is required",
+        });
+    }
+
+    // Partner pin starts at the restaurant; live tracking updates later
+    const delivery_location = {
+        latitude: restaurant_location.latitude,
+        longitude: restaurant_location.longitude,
+    };
 
     if (!provider || !["demo", "razorpay"].includes(provider)) {
         return res.status(400).json({
@@ -131,7 +156,12 @@ const createOrder = asyncHandler(async (req, res) => {
             cart_total: cart?.cart_total,
             products: cart?.products,
         },
-        delivery_address: delivery_address,
+        delivery_detail: {
+            customer_location,
+            restaurant_location,
+            delivery_location,
+        },
+
         amount: cart?.cart_total,
         razorpayOrderId: razorpayOrder?.id,
         currency: razorpayOrder?.currency || "USD",

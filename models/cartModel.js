@@ -11,6 +11,9 @@ const restaurantDataSchema = new mongoose.Schema(
     deliveryTime: { type: String },
     deliveryDistance: { type: Number },
     cuisine: [{ type: String }],
+    formattedAddress: { type: String },
+    latitude: { type: Number },
+    longitude: { type: Number },
   },
   { _id: false },
 );

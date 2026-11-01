@@ -21,6 +21,9 @@ const restaurantSummary = (restaurant) => {
     deliveryTime: restaurant.deliveryTime,
     deliveryDistance: restaurant.deliveryDistance,
     cuisine: restaurant.cuisine,
+    formattedAddress: restaurant.formattedAddress,
+    latitude: restaurant.latitude,
+    longitude: restaurant.longitude,
   };
 };
 
