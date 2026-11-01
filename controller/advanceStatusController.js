@@ -3,7 +3,6 @@ const { scheduleNextStatus } = require("../services/orderStatusService");
 const Order = require("../models/orderModel");
 const { receiver } = require("../config/qstash");
 const { publishToUser } = require("../config/pusher");
-const { getFirstRestaurantFromOrder } = require("../services/orderRestaurant");
 
 const STATUS_SEQUENCE = {
   confirmed: "prepared",
@@ -49,18 +48,18 @@ const advanceStatus = expressAsyncHandler(async (req, res) => {
       });
     }
 
+    const update = {
+      order_status: next_status,
+      order_status_updated_at: new Date(),
+    }
+
     const order = await Order.findOneAndUpdate(
       {
         order_id,
         payment_status: "paid",
         order_status: expected_status,
       },
-      {
-        $set: {
-          order_status: next_status,
-          order_status_updated_at: new Date(),
-        },
-      },
+      { $set: update },
       { new: true }
     );
 
@@ -80,7 +79,8 @@ const advanceStatus = expressAsyncHandler(async (req, res) => {
       amount: order.amount,
       currency: order.currency,
       estimated_delivery_time: order.estimated_delivery_time,
-      restaurant: getFirstRestaurantFromOrder(order),
+      restaurant: order.restaurant_data,
+      delivery_location: order.delivery_detail?.delivery_location,
     });
 
     await scheduleNextStatus(order.order_id, next_status);

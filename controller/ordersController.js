@@ -7,7 +7,6 @@ const PaymentMethod = require("../models/paymentModel");
 const Order = require("../models/orderModel");
 const { publishToUser } = require("../config/pusher");
 const { scheduleNextStatus } = require("../services/orderStatusService");
-const { getFirstRestaurantFromOrder } = require("../services/orderRestaurant");
 
 const ESTIMATED_DELIVERY_MS = 3 * 60 * 1000; // 3 minutes from createdAt
 
@@ -31,7 +30,13 @@ const createOrder = asyncHandler(async (req, res) => {
         });
     }
 
-    const { cart_id, payment_method_id = '', provider, delivery_detail } = req.body;
+    const {
+        cart_id,
+        payment_method_id = '',
+        provider,
+        delivery_detail,
+        restaurant_data,
+    } = req.body;
     const is_razorpay = provider === "razorpay";
     const razorpay_key_id = process.env.RAZORPAY_KEY_ID;
     let payment_details;
@@ -149,6 +154,8 @@ const createOrder = asyncHandler(async (req, res) => {
         });
     }
 
+    const resolved_restaurant_data = restaurant_data 
+
     const orderPayload = {
         user_id,
         cart_details: {
@@ -156,6 +163,7 @@ const createOrder = asyncHandler(async (req, res) => {
             cart_total: cart?.cart_total,
             products: cart?.products,
         },
+        restaurant_data: resolved_restaurant_data,
         delivery_detail: {
             customer_location,
             restaurant_location,
@@ -187,7 +195,8 @@ const createOrder = asyncHandler(async (req, res) => {
             currency: order.currency,
             order_status: order.order_status,
             estimated_delivery_time: order.estimated_delivery_time,
-            restaurant: getFirstRestaurantFromOrder(order),
+            restaurant: order.restaurant_data,
+            delivery_location: order.delivery_detail?.delivery_location,
         });
 
         await scheduleNextStatus(order?.order_id, order.order_status);
@@ -329,7 +338,9 @@ const verifyOrder = asyncHandler(async (req, res) => {
             currency: appOrder.currency,
             order_status: appOrder.order_status,
             estimated_delivery_time: appOrder.estimated_delivery_time,
-            restaurant: getFirstRestaurantFromOrder(appOrder),
+            restaurant:
+                appOrder.restaurant_data,
+            delivery_location: appOrder.delivery_detail?.delivery_location,
         });
 
         await scheduleNextStatus(appOrder?.order_id, appOrder.order_status);

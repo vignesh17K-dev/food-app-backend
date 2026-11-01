@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
-const { cartItemSchema } = require("./cartModel");
+const { cartItemSchema, restaurantDataSchema } = require("./cartModel");
 
 const paymentDetailsSchema = new mongoose.Schema(
   {
@@ -68,6 +68,7 @@ const orderModelSchema = new mongoose.Schema(
     },
     user_id: { type: String, required: true, index: true },
     cart_details: { type: cartDetailsSchema, required: true },
+    restaurant_data: { type: restaurantDataSchema, required: false },
     amount: { type: Number, required: true },
     order_status: {
       type: String,
