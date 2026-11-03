@@ -3,6 +3,7 @@ const { scheduleNextStatus } = require("../services/orderStatusService");
 const Order = require("../models/orderModel");
 const { receiver } = require("../config/qstash");
 const { publishToUser } = require("../config/pusher");
+const { lerpDeliveryLocation } = require("../services/deliveryLocation");
 
 const STATUS_SEQUENCE = {
   confirmed: "prepared",
@@ -48,9 +49,33 @@ const advanceStatus = expressAsyncHandler(async (req, res) => {
       });
     }
 
+    const current = await Order.findOne({
+      order_id,
+      payment_status: "paid",
+      order_status: expected_status,
+    });
+
+    if (!current) {
+      return res.status(200).json({
+        success: true,
+        skipped: true,
+        message: "Order not updated (already advanced or not found)",
+      });
+    }
+
+    const delivery_location =
+      lerpDeliveryLocation(
+        current.delivery_detail?.restaurant_location,
+        current.delivery_detail?.customer_location,
+        next_status
+      ) || current.delivery_detail?.delivery_location;
+
     const update = {
       order_status: next_status,
       order_status_updated_at: new Date(),
+    };
+    if (delivery_location) {
+      update["delivery_detail.delivery_location"] = delivery_location;
     }
 
     const order = await Order.findOneAndUpdate(
