@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { v4: uuidv4 } = require("uuid");
-const { cartItemSchema } = require("./cartModel");
+const { cartItemSchema, restaurantDataSchema } = require("./cartModel");
 
 const paymentDetailsSchema = new mongoose.Schema(
   {
@@ -21,17 +21,42 @@ const cartDetailsSchema = new mongoose.Schema(
     cart_id: { type: String, required: true },
     cart_total: { type: Number, required: true },
     products: {
+      type: Map,
+      of: {
         type: Map,
-        of: {
-          type: Map,
-          of: cartItemSchema,
-        },
-        default: {},
+        of: cartItemSchema,
       },
+      default: {},
+    },
   },
   { _id: false }
 );
 
+const LocationWithAddressSchema = new mongoose.Schema(
+  {
+    formattedAddress: { type: String, required: true },
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+const DeliveryPartnerLocationSchema = new mongoose.Schema(
+  {
+    latitude: { type: Number, required: true },
+    longitude: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+const DeliveryDetailSchema = new mongoose.Schema(
+  {
+    customer_location: { type: LocationWithAddressSchema, required: true },
+    restaurant_location: { type: LocationWithAddressSchema, required: true },
+    delivery_location: { type: DeliveryPartnerLocationSchema, required: true },
+  },
+  { _id: false }
+);
 
 const orderModelSchema = new mongoose.Schema(
   {
@@ -43,11 +68,20 @@ const orderModelSchema = new mongoose.Schema(
     },
     user_id: { type: String, required: true, index: true },
     cart_details: { type: cartDetailsSchema, required: true },
-    total: { type: Number, required: true },
-    payment_details: { type: paymentDetailsSchema, required: true },
+    restaurant_data: { type: restaurantDataSchema, required: false },
+    amount: { type: Number, required: true },
+    order_status: {
+      type: String,
+      enum: ["confirmed", "prepared", "out_for_delivery", "delivered", "cancelled"],
+      default: "confirmed",
+    },
+    delivery_detail: { type: DeliveryDetailSchema, required: true },
+    payment_details: { type: paymentDetailsSchema, required: false },
     razorpayOrderId: { type: String, required: true, unique: true },
     currency: { type: String, default: "INR" },
-    status: {
+    // Absolute ETA: set once at confirm as createdAt + 2 minutes
+    estimated_delivery_time: { type: Date },
+    payment_status: {
       type: String,
       enum: ["created", "paid", "failed"],
       default: "created",
