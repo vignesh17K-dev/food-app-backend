@@ -2852,5 +2852,20 @@ const assignRestaurantIds = () => {
 
 assignRestaurantIds();
 
+/** Copy sizes from product_details onto products_data (same product id). */
+const assignSizesFromDetails = () => {
+  const sizesById = new Map(
+    (mock_data.product_details || []).map((detail) => [
+      detail.id,
+      detail.sizes || [],
+    ]),
+  );
+  for (const product of mock_data.products_data) {
+    product.sizes = sizesById.get(product.id) || [];
+  }
+};
+
+assignSizesFromDetails();
+
 module.exports = mock_data;
 
