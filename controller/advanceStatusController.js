@@ -2,7 +2,7 @@ const expressAsyncHandler = require("express-async-handler");
 const { scheduleNextStatus } = require("../services/orderStatusService");
 const Order = require("../models/orderModel");
 const { receiver } = require("../config/qstash");
-const { publishToUser } = require("../config/pusher");
+const { publishOrderStatusUpdate } = require("../services/orderNotificationService");
 const { lerpDeliveryLocation } = require("../services/deliveryLocation");
 
 const STATUS_SEQUENCE = {
@@ -97,7 +97,7 @@ const advanceStatus = expressAsyncHandler(async (req, res) => {
       });
     }
 
-    await publishToUser(order.user_id, "order-status-updated", {
+    await publishOrderStatusUpdate(order, {
       order_id: order.order_id,
       order_status: next_status,
       payment_status: order.payment_status,

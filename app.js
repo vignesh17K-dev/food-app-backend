@@ -11,7 +11,7 @@ const port = process?.env?.PORT || 5000;
 
 const corsOptions = {
   origin: '*', // Allow only this origin
-  methods: ['GET', 'POST', 'DELETE'],            // Allow GET, POST, DELETE
+  methods: ['GET', 'POST', 'DELETE', 'PATCH'],
   allowedHeaders: ["Content-Type", "Authorization"], // ✅ Allow Authorization header
   credentials: true, // Allow specific headers
 };
@@ -33,6 +33,7 @@ app.use("/api/contact", require('./routes/contact'));
 app.use("/api/payment", require('./routes/payment.js'));
 app.use("/api/order", require("./routes/order.js"));
 app.use("/api/pusher", require("./routes/pusher.js"));
+app.use("/api/notifications", require("./routes/notifications"));
 app.use(errorHandler);
 
 app.listen(port, () => {
