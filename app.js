@@ -33,6 +33,7 @@ app.use("/api/contact", require('./routes/contact'));
 app.use("/api/payment", require('./routes/payment.js'));
 app.use("/api/order", require("./routes/order.js"));
 app.use("/api/pusher", require("./routes/pusher.js"));
+app.use("/api/notifications", require("./routes/notifications"));
 app.use(errorHandler);
 
 app.listen(port, () => {

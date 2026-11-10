@@ -5,7 +5,7 @@ const razorpay = require("../config/razorpay");
 const Cart = require("../models/cartModel");
 const PaymentMethod = require("../models/paymentModel");
 const Order = require("../models/orderModel");
-const { publishToUser } = require("../config/pusher");
+const { publishOrderStatusUpdate } = require("../services/orderNotificationService");
 const { scheduleNextStatus } = require("../services/orderStatusService");
 
 const ESTIMATED_DELIVERY_MS = 3 * 60 * 1000; // 3 minutes from createdAt
@@ -188,7 +188,7 @@ const createOrder = asyncHandler(async (req, res) => {
     await Cart.findOneAndDelete({ cart_id, user_id });
 
     if (!is_razorpay) {
-        await publishToUser(user_id, "order-status-updated", {
+        await publishOrderStatusUpdate(order, {
             order_id: order.order_id,
             payment_status: order.payment_status,
             amount: order.amount,
@@ -331,15 +331,14 @@ const verifyOrder = asyncHandler(async (req, res) => {
         };
         await appOrder.save();
 
-        await publishToUser(appOrder.user_id, "order-status-updated", {
+        await publishOrderStatusUpdate(appOrder, {
             order_id: appOrder.order_id,
             payment_status: appOrder.payment_status,
             amount: appOrder.amount,
             currency: appOrder.currency,
             order_status: appOrder.order_status,
             estimated_delivery_time: appOrder.estimated_delivery_time,
-            restaurant:
-                appOrder.restaurant_data,
+            restaurant: appOrder.restaurant_data,
             delivery_location: appOrder.delivery_detail?.delivery_location,
         });
 
